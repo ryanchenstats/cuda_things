@@ -20,7 +20,7 @@ __global__ void add(int *a, int *b, int *c)
     // index takes into account number of blocks and threads
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-
+    // printf("index: %d, %d\n", blockDim.x, gridDim.x);
     // our array is arranged in a linear fashion of
     // size N <= gridDim.x * blockDim.x * threadDim
     // iterate N by index
@@ -64,8 +64,8 @@ int main()
     clock_t g_begin = clock();
     int num_grids = 2;
     num_blocks = (N + 1) / 2;
-    int num_threads = N / num_blocks / 2;
-    add<<<num_grids, num_blocks, 256>>>(h_a, h_b, h_c);
+    int num_threads = 256;
+    add<<<num_grids, num_blocks, num_threads>>>(h_a, h_b, h_c);
     cudaDeviceSynchronize();
     clock_t g_end = clock();
 
