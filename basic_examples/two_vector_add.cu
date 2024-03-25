@@ -15,18 +15,31 @@
 using namespace std;
 
 // this time, make each thread compute several elements of the array
+__device__ void prints()
+{
+    printf("Block size: %d\n", blockDim.x);
+    printf("Block index: %d\n", blockIdx.x);
+    printf("Thread index: %d\n", threadIdx.x);
+    printf("Thread size: %d\n", blockDim.x);
+    printf("Grid size: %d\n", gridDim.x);
+}
+
 __global__ void add(int *a, int *b, int *c)
 {
     // index takes into account number of blocks and threads
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-    // printf("index: %d, %d\n", blockDim.x, gridDim.x);
+    // gridDim.x is the number of blocks in the grid
+    // blockDim.x is the number of threads in a block
+    // stride is the total number of threads in a grid
+
     // our array is arranged in a linear fashion of
-    // size N <= gridDim.x * blockDim.x * threadDim
+    // size N <= num_grids * gridDim.x * blockDim.x
     // iterate N by index
     // we skip ever blockdim * griddim elemts
-    // basically says, we add every thread i of
-    //      each grid[m], block[n],
+    // basically says, we add every thread i out of ("stride") of
+    //      grid[m] for each m
+    // int flag = 0;
     for (int i = index; i < N; i += stride)
     {
         c[i] = a[i] + b[i];
@@ -55,17 +68,25 @@ int main()
     size_of_block = 64;
     num_blocks = (N + size_of_block - 1) / size_of_block;
 
-    // define num_blocks, and threads per block
-    add<<<num_blocks, size_of_block>>>(h_a, h_b, h_c);
+    // define num_grids, num_blocks, and threads per block
+    add<<<1, num_blocks, size_of_block>>>(h_a, h_b, h_c);
     cudaDeviceSynchronize();
 
     clock_t d_end = clock();
 
+    cudaFree(h_a);
+    cudaFree(h_b);
+    cudaFree(h_c);
+
+    cudaMallocManaged(&h_a, N * sizeof(int));
+    cudaMallocManaged(&h_b, N * sizeof(int));
+    cudaMallocManaged(&h_c, N * sizeof(int));
+
     clock_t g_begin = clock();
     int num_grids = 2;
     num_blocks = (N + 1) / 2;
-    int num_threads = 256;
-    add<<<num_grids, num_blocks, num_threads>>>(h_a, h_b, h_c);
+    // num grids, num blocks, shared memory
+    add<<<num_blocks, size_of_block>>>(h_a, h_b, h_c);
     cudaDeviceSynchronize();
     clock_t g_end = clock();
 
