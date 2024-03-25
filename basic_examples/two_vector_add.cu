@@ -12,6 +12,8 @@
 #define N 10000000
 #define ops_per_thread 10
 
+using namespace std;
+
 // this time, make each thread compute several elements of the array
 __global__ void add(int *a, int *b, int *c)
 {
@@ -20,7 +22,7 @@ __global__ void add(int *a, int *b, int *c)
     int stride = blockDim.x * gridDim.x;
 
     // our array is arranged in a linear fashion of
-    // size N <= gridDim.x * blockDim.x
+    // size N <= gridDim.x * blockDim.x * threadDim
     // iterate N by index
     // we skip ever blockdim * griddim elemts
     // basically says, we add every thread i of
@@ -53,10 +55,19 @@ int main()
     size_of_block = 64;
     num_blocks = (N + size_of_block - 1) / size_of_block;
 
+    // define num_blocks, and threads per block
     add<<<num_blocks, size_of_block>>>(h_a, h_b, h_c);
     cudaDeviceSynchronize();
 
     clock_t d_end = clock();
+
+    clock_t g_begin = clock();
+    int num_grids = 2;
+    num_blocks = (N + 1) / 2;
+    int num_threads = N / num_blocks / 2;
+    add<<<num_grids, num_blocks, 256>>>(h_a, h_b, h_c);
+    cudaDeviceSynchronize();
+    clock_t g_end = clock();
 
     // for (int i = 0; i < N; i++)
     // {
@@ -76,8 +87,9 @@ int main()
     }
     clock_t h_end = clock();
 
-    printf("Time taken by GPU: %f\n", (double)(d_end - d_begin) / CLOCKS_PER_SEC);
-    printf("Time taken by CPU: %f\n", (double)(h_end - h_begin) / CLOCKS_PER_SEC);
+    cout << "Time taken by GPU 1 grid: " << (double)(d_end - d_begin) / CLOCKS_PER_SEC << endl;
+    cout << "Time taken by GPU 2 grid: " << (double)(g_end - g_begin) / CLOCKS_PER_SEC << endl;
+    cout << "Time taken by CPU: " << (double)(h_end - h_begin) / CLOCKS_PER_SEC << endl;
 
     cudaFree(h_a);
     cudaFree(h_b);
