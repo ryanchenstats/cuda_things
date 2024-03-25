@@ -1,5 +1,12 @@
+// this is a C program that uses CUDA to run on the GPU
+// nvcc simple_ols.cu
+// produces a.out
+// run with ./a.out
+
 // simple OLS with cuda for beta calculation
 // no matrix operations, just loops and vectorization
+// vectorization is not expected to perform faster in this case
+// because problem is too simple and overhead of copying data to device is too high
 
 #include<iostream>
 #include<cuda_runtime.h>

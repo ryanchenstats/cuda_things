@@ -1,3 +1,8 @@
+// this is a C program that uses CUDA to run on the GPU
+// nvcc hello_word.cu
+// produces a.out
+// run with ./a.out
+
 # include <stdio.h>
 
 __device__ void Device1()

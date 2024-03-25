@@ -1,3 +1,8 @@
+// this is a C program that uses CUDA to run on the GPU
+// nvcc two_vector_add.cu
+// produces a.out
+// run with ./a.out
+
 #include<iostream>
 #include<cuda_runtime.h>
 #include<time.h>
