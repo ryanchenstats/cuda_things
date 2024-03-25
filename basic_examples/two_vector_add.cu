@@ -88,7 +88,7 @@ int main()
     clock_t h_end = clock();
 
     cout << "Time taken by GPU 1 grid: " << (double)(d_end - d_begin) / CLOCKS_PER_SEC << endl;
-    cout << "Time taken by GPU 2 grid: " << (double)(g_end - g_begin) / CLOCKS_PER_SEC << endl;
+    cout << "Time taken by GPU 2 grids: " << (double)(g_end - g_begin) / CLOCKS_PER_SEC << endl;
     cout << "Time taken by CPU: " << (double)(h_end - h_begin) / CLOCKS_PER_SEC << endl;
 
     cudaFree(h_a);
